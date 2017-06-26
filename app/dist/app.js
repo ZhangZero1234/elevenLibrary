@@ -612,7 +612,6 @@ function($cookies,$scope, $http, $timeout, $location, adminBooksService) {
     $scope.book = {},
     $scope.book.status = 0;
     $scope.book.unqId = (Date.parse(new Date())/2+parseInt(Math.random()*1000000000)).toString()+parseInt(Math.random()*100);
-    // $scope.book.unqId = $scope.book.isbn;
     if($cookies.getObject("status_admin").intrID == "libadmin@cn.ibm.com")
     {
         $scope.book.owner = 'ibm'; 
@@ -738,6 +737,7 @@ function($scope, $state, $rootScope, BooksService) {
         $scope.getDataOver = !1,
         $scope.showScrollToTop = !1,
         BooksService.getAllBooks().success(function(res) {
+            console.log(res);
             for (var intrID = $rootScope.logInUser.intrID,
             total = 0,
             i = 0; i < res.length; i++) {
@@ -754,7 +754,8 @@ function($scope, $state, $rootScope, BooksService) {
             }
             $scope.updatePop(),
             $scope.getDataOver = !0
-        })
+        });
+        console.log($scope.books);
     }
 }]),
 bookApp.controller("AllBooksCtrl", ["$scope", "$rootScope", "$state", "$timeout", "BooksService",
@@ -764,10 +765,11 @@ function($scope, $rootScope, $state, $timeout, BooksService) {
     var timeout;
     
     $scope.like = function(book) {
+        // console.log(book);
         book.isLiked = !book.isLiked,
         timeout && $timeout.cancel(timeout),
         timeout = $timeout(function() {
-            BooksService.likeBook(book.isbn, $rootScope.logInUser.intrID, book.isLiked).success(function(res) {
+            BooksService.likeBook(book.unqId, $rootScope.logInUser.intrID, book.isLiked).success(function(res) {
                 book.likes = res;
                 for (var i = 0; i < book.likes.length; i++) if (book.likes[i] === $rootScope.logInUser.intrID) {
                     book.isLiked = !0;
@@ -782,6 +784,7 @@ function($scope, $rootScope, $state, $timeout, BooksService) {
 bookApp.controller("DetailBookCtrl", ["$http","$cookies","$scope", "$rootScope", "$timeout", "$state", "$location", "BooksService", "$window",
 function($http,$cookies,$scope, $rootScope, $timeout, $state, $location, BooksService, $window) {
     console.log("DetailBookCtrl Start"),
+    // console.log($scope.books),
     $scope.simBooks = [],
     $scope.tarValue = 0,
     $scope.content = "",
@@ -807,12 +810,13 @@ function($http,$cookies,$scope, $rootScope, $timeout, $state, $location, BooksSe
         return $scope.getDataOver
     },
     function() {
-        for (var i = 0; i < $scope.books.length; i++) if ($scope.books[i].isbn == $state.params.bookId) {
+        for (var i = 0; i < $scope.books.length; i++) if ($scope.books[i].unqId == $state.params.bookId) {
             $scope.index = i,
+            console.log($scope.index),
             $scope.books[i].applyTime && ($scope.expireDate = new Date($scope.books[i].applyTime).setDate(new Date($scope.books[i].applyTime).getDate() + 2));
             break
         }
-            $http.post("/details/contact/info",{isbn:$state.params.bookId}).success(function(res){
+            $http.post("/details/contact/info",{unqId:$state.params.bookId}).success(function(res){
             console.log(res);
             if(res.errType==0){if(res.owner =='ibm'){
                 $scope.contact_name = "Charlene";
@@ -832,8 +836,9 @@ function($http,$cookies,$scope, $rootScope, $timeout, $state, $location, BooksSe
         $scope.simBooks = res,
         $scope.showSimilarBooks = 0 != $scope.simBooks.length ? !0 : !1
     }),
-    //975
+    //1157
     $scope.borrow = function() {
+        // console.log($state.params);
         BooksService.borrrowBook($state.params.bookId, $rootScope.logInUser.intrID).success(function(res) {
              // console.log(res);
             0 == res.errType ? ($scope.books[$scope.index].intrID = $rootScope.logInUser.intrID, $scope.books[$scope.index].status = 1, $scope.books[$scope.index].applyTime = res.applyTime, $scope.showMsg = !0, $scope.books[$scope.index].applyTime && ($scope.expireDate = new Date($scope.books[$scope.index].applyTime).setDate(new Date($scope.books[$scope.index].applyTime).getDate() + 2))) : 1 == res.errType ? $("#warningModal").modal("show") : 2 == res.errType ? $("#noneModal").modal("show") : 3 == res.errType && $("#errorModal").modal("show")
@@ -843,6 +848,7 @@ function($http,$cookies,$scope, $rootScope, $timeout, $state, $location, BooksSe
         })
     },
     $scope.cancel = function() {
+        console.log(555);
         $timeout(function() {
             BooksService.cancelBook($state.params.bookId, $rootScope.logInUser.intrID).success(function(res) {
                 delete $scope.books[$scope.index].intrID,
@@ -865,7 +871,7 @@ function($http,$cookies,$scope, $rootScope, $timeout, $state, $location, BooksSe
         $scope.books[$scope.index].isLiked = !$scope.books[$scope.index].isLiked,
         timeout && $timeout.cancel(timeout),
         // timeout = $timeout(function() {
-            BooksService.likeBook($scope.books[$scope.index].isbn, $rootScope.logInUser.intrID, $scope.books[$scope.index].isLiked).success(function(res) {
+            BooksService.likeBook($state.params.bookId, $rootScope.logInUser.intrID, $scope.books[$scope.index].isLiked).success(function(res) {
                 $scope.books[$scope.index].likes = res,
                 $scope.updatePop();
                 flag_like = true;
@@ -875,7 +881,7 @@ function($http,$cookies,$scope, $rootScope, $timeout, $state, $location, BooksSe
     },
     $scope.rate = function(value) {
         $scope.books[$scope.index].rateValue = value,
-        BooksService.rateBook($scope.books[$scope.index].isbn, $rootScope.logInUser.intrID, value).success(function(res) {
+        BooksService.rateBook($state.params.bookId, $rootScope.logInUser.intrID, value).success(function(res) {
             $scope.books[$scope.index].rates = res;
             for (var total = 0,
             i = 0; i < $scope.books[$scope.index].rates.length; i++) total += $scope.books[$scope.index].rates[i].value,
@@ -884,20 +890,24 @@ function($http,$cookies,$scope, $rootScope, $timeout, $state, $location, BooksSe
         })
     },
     $scope.comment = function() {
+        console.log($state.params.bookId);
 
         if(!flag_click_submitComent)
         {
             return;
-        }
+        }//$scope.books[$scope.index].unqId
         flag_click_submitComent = false;
-        0 != $scope.content.length && BooksService.commentBook($scope.books[$scope.index].isbn, $rootScope.logInUser.intrID, $scope.content).success(function(res) {
+        if(0 != $scope.content.length)
+            BooksService.commentBook($state.params.bookId, $rootScope.logInUser.intrID, $scope.content).success(function(res) {
             flag_click_submitComent = true;
-            $scope.books[$scope.index].comments = res,
-            $scope.content = ""
+            console.log(res);
+            // $scope.update();
+            $scope.books[$scope.index].comments = res;
+            $scope.content = "";
         })
     },
     $scope.deleteComment = function(id) {
-        BooksService.deleteComment($scope.books[$scope.index].isbn, id).success(function(res) {
+        BooksService.deleteComment($scope.books[$scope.index].unqId, id).success(function(res) {
             $scope.books[$scope.index].comments = res
         }).error(function(res) {
             console.error("deleteComment error", res)
@@ -1153,36 +1163,36 @@ function($http) {
             return $http.get("/book/" + isbn + "/similar")
         },
         //716
-        borrrowBook: function(isbn, intrID) {
-            return $http.put("/book/" + isbn + "/borrow", {
+        borrrowBook: function(unqId, intrID) {
+            return $http.put("/book/" + unqId + "/borrow", {
                 intrID: intrID
             })
         },
-        cancelBook: function(isbn, intrID) {
-            return $http.put("/book/" + isbn + "/cancelBorrow", {
+        cancelBook: function(unqId, intrID) {
+            return $http.put("/book/" + unqId + "/cancelBorrow", {
                 intrID: intrID
             })
         },
-        likeBook: function(isbn, intrID, ifYou) {
-            return $http.put("/book/" + isbn + "/like", {
+        likeBook: function(unqId, intrID, ifYou) {
+            return $http.put("/book/" + unqId + "/like", {
                 intrID: intrID,
                 ifYou: ifYou
             })
         },
-        rateBook: function(isbn, intrID, value) {
-            return $http.put("/book/" + isbn + "/rate", {
+        rateBook: function(unqId, intrID, value) {
+            return $http.put("/book/" + unqId + "/rate", {
                 intrID: intrID,
                 value: value
             })
         },
-        commentBook: function(isbn, intrID, content) {
-            return $http.put("/book/" + isbn + "/comment", {
+        commentBook: function(unqId, intrID, content) {
+            return $http.put("/book/" + unqId + "/comment", {
                 intrID: intrID,
                 content: content
             })
         },
-        deleteComment: function(isbn, _id) {
-            return $http["delete"]("/book/" + isbn + "/comment/" + _id)
+        deleteComment: function(unqId, _id) {
+            return $http["delete"]("/book/" + unqId + "/comment/" + _id)
         },
         books: books
     }

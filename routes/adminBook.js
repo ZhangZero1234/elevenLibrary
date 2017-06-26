@@ -76,7 +76,7 @@ module.exports = function(app){
           var newBooks = [];
           for (var i = 0; i < books.data.length; i++) {
             for (var j = 0; j < booksprop.data.length; j++) {
-              if (books.data[i].isbn == booksprop.data[j].isbn) {
+              if (books.data[i].unqId == booksprop.data[j].unqId) {
                 var book = {};
                 book.unqId = books.data[i].unqId;
                 book.isbn = books.data[i].isbn;

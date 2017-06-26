@@ -261,7 +261,7 @@ var database = require("./database_setting.js");
             var lengthPro = booksprop.data.length;
             for (i = 0; i < lengthBooks; i++) {
               for (j = 0; j < lengthPro; j++) {
-                if (books.data[i].isbn == booksprop.data[j].isbn) {
+                if (books.data[i].unqId == booksprop.data[j].unqId) {
                   var book = {};
                   book.unqId = books.data[i].unqId;
                   book.isbn = books.data[i].isbn;
@@ -297,12 +297,12 @@ var database = require("./database_setting.js");
     });
 
     // Likes, Rates and Comments
-    app.put('/book/:isbn/like', filter.authorize , function(req,res){
+    app.put('/book/:unqId/like', filter.authorize , function(req,res){
       var db = req.app.get('db');
-      var isbn = req.params.isbn;
+      var unqId = req.params.unqId;
       var intrID = req.body.intrID;
       var ifYou = req.body.ifYou;
-      console.log(isbn);
+      // console.log(isbn);
       var buffer_like = [];
       var buffer_unlike = [];
       if(ifYou)
@@ -315,7 +315,7 @@ var database = require("./database_setting.js");
           else{
             for(var i = 0 ; i < booksprop.data.length ; i++)
             {
-              if(booksprop.data[i].isbn == isbn)
+              if(booksprop.data[i].unqId == unqId)
               {
                 booksprop.data[i].likes.push(intrID);
                 buffer_like = booksprop.data[i].likes;
@@ -346,7 +346,7 @@ var database = require("./database_setting.js");
             for(var n = 0 ; n < booksprop.data.length ; n++)
             {
 
-              if(booksprop.data[n].isbn == isbn)
+              if(booksprop.data[n].unqId == unqId)
               {
                 for(var m = 0 ; m < booksprop.data[n].likes.length ; m++)
                 {
@@ -374,10 +374,10 @@ var database = require("./database_setting.js");
       }
     });
 
-    app.put('/book/:isbn/comment', filter.authorize,function(req,res){
+    app.put('/book/:unqId/comment', filter.authorize,function(req,res){
         var comments = [];
         var db = req.app.get("db");
-        var isbn = req.params.isbn;
+        var unqId = req.params.unqId;
         var intrID = req.body.intrID;
         var content = req.body.content;
         db.get(database.detailsDb,function(err,booksprop){
@@ -389,7 +389,7 @@ var database = require("./database_setting.js");
           else{
             for(var i = 0 ; i < booksprop.data.length ; i++)
             {
-              if(booksprop.data[i].isbn == isbn)
+              if(booksprop.data[i].unqId == unqId)
               {
                 booksprop.data[i].comments.push({
                   _id:Date.now().toString()+parseInt(Math.random()*10000),
@@ -415,9 +415,9 @@ var database = require("./database_setting.js");
         });
       });
 
-    app.delete('/book/:isbn/comment/:id', filter.authorize,function(req,res){
+    app.delete('/book/:unqId/comment/:id', filter.authorize,function(req,res){
       var db = req.app.get("db");
-      var isbn = req.params.isbn;
+      var unqId = req.params.unqId;
       var id = req.params.id;
       var conments_new = [];
       // console.log(id);
@@ -430,7 +430,7 @@ var database = require("./database_setting.js");
         else{
           for(var i = 0 ; i < booksprop.data.length ; i++)
           {
-            if(booksprop.data[i].isbn==isbn)
+            if(booksprop.data[i].unqId==unqId)
             {
               for(var j = 0 ; j < booksprop.data[i].comments.length ; j++)
               {
@@ -458,14 +458,14 @@ var database = require("./database_setting.js");
       });
     });
 
-    app.put('/book/:isbn/rate', filter.authorize,function(req,res){
+    app.put('/book/:unqId/rate', filter.authorize,function(req,res){
       var my_rate = [];
       var flag = true;
       var db = req.app.get("db");
-      var isbn = req.params.isbn;
+      var unqId = req.params.unqId;
       var intrID = req.body.intrID;
       var value = req.body.value;
-      console.log("isbn:"+isbn,"intrID:"+intrID,"value:"+value);
+      // console.log("isbn:"+isbn,"intrID:"+intrID,"value:"+value);
       db.get(database.detailsDb,function(err,booksprop){
         if(err)
         {
@@ -475,7 +475,7 @@ var database = require("./database_setting.js");
         else{
           for(var i = 0 ; i < booksprop.data.length ; i++)
           {
-            if(booksprop.data[i].isbn == isbn)
+            if(booksprop.data[i].unqId == unqId)
             {
               for(var j = 0 ; j < booksprop.data[i].rates.length ; j++)
               {

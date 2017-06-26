@@ -5,7 +5,7 @@ var filter = require('../models/Filter.js');
 var database = require("./database_setting.js");
 
 module.exports = function(app) {
-  app.put('/book/:isbn/borrow', filter.authorize, function(req, res) {
+  app.put('/book/:unqId/borrow', filter.authorize, function(req, res) {
     var count = 0;
     var db = req.app.get('db');
     var intrID = req.body.intrID;
@@ -44,9 +44,10 @@ module.exports = function(app) {
             console.log('[Find book] Find book DB err : ' + err);
           }
           else{
+            console.log("jinlailaalalalalalalala");
             for(var i = 0 ; i < book.data.length ; i++)
             {
-              if( (book.data[i].isbn == req.params.isbn) && book.data[i].status==0)
+              if( (book.data[i].unqId == req.params.unqId) && book.data[i].status==0)
               {
                 flag = true;
                 var applyTime = Date();
@@ -546,31 +547,68 @@ module.exports = function(app) {
     return expTime;
   };
 
-  app.put('/book/:isbn/cancelBorrow', filter.authorize, function(req, res) {
-    console.log('CancelBorrow start', req.body);
-    var intrID = req.body.intrID;
-    var isbn = req.params.isbn;
-    Book.findOneAndUpdate({
-      isbn: isbn,
-      status: 1,
-      intrID: intrID
-    }, {
-      status: 0,
-      $unset: {
-        intrID: '',
-        applyTime: null
-      }
-    }, function(err, book) {
-      if (err) {
-        req.send({
-          errType: 0
-        });
-      } else {
-        console.log("[cancelBorrow]book =", book);
-        res.send({
-          errType: 0
-        });
-      };
+  app.put('/book/:unqId/cancelBorrow', filter.authorize, function(req, res) {
+     
+      var intrID = req.body.intrID;
+      var unqId = req.params.unqId;
+      var db = req.app.get('db');
+      db.get(database.listsDb,function(err,books){
+        if(err)
+        {
+          console.log("open"+listsDb+"database err:"+err);
+        }
+        else{
+          for(var i = 0 ; i < books.data.length ; i++)
+          {
+            if(unqId == books.data[i].unqId)
+            {
+              books.data[i].status = 0 ;
+              books.data[i].intrID = "";
+              books.data[i].applyTime = "";
+              break;
+            }
+          }
+          db.insert(books,function(err,data){
+            if(err)
+            {
+              console.log("upadate database err:"+err);
+            }
+            else{
+              res.send({
+                errType: 0
+              });
+            }
+          });
+        }
+      });
     });
-  });
+
+  // app.put('/book/:unqId/cancelBorrow', filter.authorize, function(req, res) {
+  //   console.log('CancelBorrow start', req.body);
+  //   var intrID = req.body.intrID;
+  //   var unqId = req.params.isbn;
+  //   var db = req.app.get('db');
+  //   Book.findOneAndUpdate({
+  //     isbn: isbn,
+  //     status: 1,
+  //     intrID: intrID
+  //   }, {
+  //     status: 0,
+  //     $unset: {
+  //       intrID: '',
+  //       applyTime: null
+  //     }
+  //   }, function(err, book) {
+  //     if (err) {
+  //       req.send({
+  //         errType: 0
+  //       });
+  //     } else {
+  //       console.log("[cancelBorrow]book =", book);
+  //       res.send({
+  //         errType: 0
+  //       });
+  //     };
+  //   });
+  // });
 };

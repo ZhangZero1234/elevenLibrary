@@ -393,7 +393,7 @@ module.exports = function(app) {
   // });
   app.post("/details/contact/info",function(req,res){
     var db = req.app.get("db");
-    var isbn = req.body.isbn;
+    var unqId = req.body.unqId;
     var owner = '';
     db.get(database.listsDb,function(err,books){
       if(err)
@@ -403,7 +403,7 @@ module.exports = function(app) {
       else{
         for(var i = 0; i < books.data.length ; i++)
         {
-          if(books.data[i].isbn == isbn)
+          if(books.data[i].unqId == unqId)
           {
             owner = books.data[i].owner;
             if(owner=='ibm')
