@@ -710,7 +710,7 @@ function($scope, LogsService) {
 var bookApp = angular.module("bookApp", ["wu.masonry", "infinite-scroll", "serviceApp"]);
 bookApp.controller("MainBooksCtrl", ["$scope", "$state", "$rootScope", "BooksService",
 function($scope, $state, $rootScope, BooksService) {
-   
+   $scope.load_flag = true;
     console.log("MainBooksCtrl Start"),
     $scope.books = [],
     $scope.popBooks = [],
@@ -753,7 +753,8 @@ function($scope, $state, $rootScope, BooksService) {
                 $scope.books.push(res[i])
             }
             $scope.updatePop(),
-            $scope.getDataOver = !0
+            $scope.getDataOver = !0;
+            $scope.load_flag = false;
         });
         console.log($scope.books);
     }
@@ -783,6 +784,7 @@ function($scope, $rootScope, $state, $timeout, BooksService) {
 }]),
 bookApp.controller("DetailBookCtrl", ["$http","$cookies","$scope", "$rootScope", "$timeout", "$state", "$location", "BooksService", "$window",
 function($http,$cookies,$scope, $rootScope, $timeout, $state, $location, BooksService, $window) {
+   $('[data-toggle="popover"]').popover();
     console.log("DetailBookCtrl Start"),
     // console.log($scope.books),
     $scope.simBooks = [],
@@ -806,14 +808,18 @@ function($http,$cookies,$scope, $rootScope, $timeout, $state, $location, BooksSe
     //     $scope.contact_email = "lzishuo@cn.ibm.com";
     //     $scope.contact_phone = "17709812886";
     // }
+    
     $scope.$watch(function() {
+
         return $scope.getDataOver
     },
     function() {
+        console.log(1);
         for (var i = 0; i < $scope.books.length; i++) if ($scope.books[i].unqId == $state.params.bookId) {
             $scope.index = i,
             console.log($scope.index),
             $scope.books[i].applyTime && ($scope.expireDate = new Date($scope.books[i].applyTime).setDate(new Date($scope.books[i].applyTime).getDate() + 2));
+            console.log($scope.books[i]);
             break
         }
             $http.post("/details/contact/info",{unqId:$state.params.bookId}).success(function(res){
@@ -917,6 +923,7 @@ function($http,$cookies,$scope, $rootScope, $timeout, $state, $location, BooksSe
 var userApp = angular.module("userApp", ["ngMessages", "directApp", "serviceApp"]);
 userApp.controller("LoginCtrl", ["$scope", "$rootScope", "$http", "$location", "$timeout", "$cookies",
 function($scope, $rootScope, $http, $location, $timeout, $cookies) {
+    var time_seconds = 1500;
     $scope.user = {},
     $scope.submitted = !1;
     if($cookies.getObject("register_info"))
@@ -928,9 +935,19 @@ function($scope, $rootScope, $http, $location, $timeout, $cookies) {
         $scope.pwdError = !1,
         $scope.userError = !1,
         $scope.serverError = !1,
-        $scope.loginForm.submitted = !1
+        $scope.loginForm.submitted = !1;
+        $("#loginBtn").attr("disabled",false);
     },
     $scope.login = function() {
+        $("#seven_content").on('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend',function(){
+            $scope.shake_flag=false; 
+        })
+        $scope.shake_flag=false;
+        function test_animate(){          
+            $scope.shake_flag=true;
+            $("#seven_content").trigger("on");   
+        };
+
         $cookies.remove("register_info");
         if ($scope.initState(), $scope.loginForm.$valid) {
             $("#loginBtn").button("loading");
@@ -940,11 +957,26 @@ function($scope, $rootScope, $http, $location, $timeout, $cookies) {
             };
             console.log(user);
             $http.post("/intrIDLogin", user).success(function(res, status, headers, config) {
-               	// console.log(res.errType);
+               	console.log(res.errType);
                 if (0 === res.errType) {
-                    $("#loginBtn").button("reset"),
-                    $location.path("/books/popular"),
-                    $rootScope.logInUser.name = res.name,
+                    $("#loginBtn").button("reset");
+                    var expireDate = new Date;
+                    expireDate.setDate(expireDate.getDate() + 1),
+                    $cookies.putObject("status_admin", {
+                        intrID: user.intrID
+                    },
+                    {
+                        expires: expireDate
+                    });
+
+                    if(history.length<=2)
+                    {
+                        $location.path("/books/popular");
+                    }
+                    else{
+                        history.back();
+                    }
+                    $rootScope.logInUser.name = res.name;
                     $rootScope.logInUser.phoneNum = res.phoneNum,
                     $rootScope.logInUser.image = res.image,
                     $rootScope.logInUser.intrID = user.intrID;
@@ -959,8 +991,11 @@ function($scope, $rootScope, $http, $location, $timeout, $cookies) {
                     {
                         expires: expireDate
                     });
+                    // $("#seven_content").removeClass("animated shake"),$("#seven_content").addClass("animated shake"),
                     console.log($cookies.getObject("user"));
-                } else 1 === res.errType || 2 === res.errType ? ($("#loginBtn").button("reset"), $scope.pwdError = !0, $timeout($scope.initState, 3e3)) : ($("#loginBtn").button("reset"), $scope.serverError = !0, $timeout($scope.initState, 3e3))
+                } else 1 === res.errType || 2 === res.errType ? 
+                (test_animate(),$scope.user.pwd="",$("#loginBtn").button("reset"), $scope.pwdError = !0,$("#loginBtn").attr("disabled",true), $timeout($scope.initState, time_seconds)) :
+                ($("#loginBtn").attr("disabled",true),test_animate(),$scope.user.pwd="",$("#loginBtn").button("reset"), $scope.serverError = !0, $timeout($scope.initState, time_seconds))
             }).error(function(res) {
                // console.log(res);
                 $("#loginBtn").button("reset"),
@@ -968,8 +1003,11 @@ function($scope, $rootScope, $http, $location, $timeout, $cookies) {
                 $timeout($scope.initState, 3e3)
             })
         } else $("#loginBtn").button("reset"),
+        test_animate(),
         $scope.loginForm.submitted = !0,
-        $timeout($scope.initState, 3e3)
+        $("#loginBtn").attr("disabled",true),
+        $timeout($scope.initState, time_seconds)
+        
     }
 }]),
 userApp.controller("RegCtrl",["$window","$scope", "$rootScope", "$http", "$location", "$timeout", "$window","$cookies"

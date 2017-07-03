@@ -3,7 +3,6 @@
   "private": true,
   "version": "0.1.0",
   "description": "An excellent library management system for AngularJS projects.",
-  // "repository": "https://github.com/ibm-cms/elevenlibrary",
   "license": "MIT",
   "engines": {
     "node": "4.x"

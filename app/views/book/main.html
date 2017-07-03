@@ -15,6 +15,7 @@
           <li><a ui-sref="main.home">Home</a></li>
           <li><a ng-class="{selected: cate=='userLiked'}" ng-click="cate='userLiked'" ui-sref="main.liked">My Favorites</a></li>
           <li><a ng-class="{selected: cate=='userBorrowed'}" ng-click="cate='userBorrowed'" ui-sref="main.borrowed">My Orders</a></li>
+          <li ng-show="logInUser.name"><a ng-class="{selected: cate=='userBorrowed'}"  ui-sref="main.borrowed">GuildLine</a></li>
           <li role="separator" class="divider"></li>
           <li><a ui-sref="main.all" ng-click="logOut()">Logout</a></li>
         </ul>
