@@ -3,6 +3,7 @@ var BookProp = require('../models/BookProp.js');
 var History = require('../models/History.js');
 var filter = require('../models/Filter.js');
 var database = require("./database_setting.js");
+var log_operate = require("./log_operation.js");
 
 module.exports = function(app) {
 	app.get('/admin/add/book/:isbn', filter.adminAuthorize, function(req, res){
@@ -178,12 +179,13 @@ module.exports = function(app) {
 
 	// });// add one book
 
-	app.post('/admin/books', function(req, res){
+	app.post('/admin/books/:intrID', function(req, res){
 		var flag = true;
+		var intrID = req.params.intrID;
 		var db = req.app.get('db');
 		// console.log(req.body);
 		var param = req.body;
-
+		var json;
 		// status: param.status==0?param.status:0, //0-free,1-reserved,2-borrowed
 		var newBook = {
 			unqId: param.unqId,
@@ -255,6 +257,13 @@ module.exports = function(app) {
 									return;
 								}
 							});
+							json = {
+		                      intrID:intrID,
+		                      time: new Date(),
+		                      action:"Add",
+		                      what:amdfBook
+		                    };
+	                        log_operate(res,db,database.logDb,json);
 							res.json({
 										'errType': 0
 									});
@@ -346,8 +355,10 @@ module.exports = function(app) {
 
     
 	
-	app.get('/admin/book/:unqId',function(req, res){	
+	app.get('/admin/book/:unqId/:intrID',function(req, res){	
 	// console.log(req.params.unqId);
+	var what_book;
+	var json;
 	var flag = true;
 	var operation = false;
 	var book_correct = false;
@@ -355,6 +366,7 @@ module.exports = function(app) {
 	var BOOK = {};
 	var BOOKPROP = {};
 	var delunqID = req.params.unqId;
+	var admin_name_delete = req.params.intrID;
 	var db = req.app.get('db');
 	db.get(database.listsDb,function(err,books){
 		if(err) {
@@ -368,6 +380,7 @@ module.exports = function(app) {
         	{
         		if(books.data[i].unqId == delunqID)
         		{
+        			what_book = books.data[i];
         			flag = false;
         			operation = true;
         			BOOK = books;
@@ -422,6 +435,17 @@ module.exports = function(app) {
 				        				}
 				        				else{
 			        					  	console.log('[Insert History]DB updata book Successfull');
+			        					  	if(admin_name_delete)
+			        					  	{
+			        					  		console.log(admin_name_delete);
+			        					  		json = {
+							                      intrID:admin_name_delete,
+							                      time: new Date(),
+							                      action:"Delete",
+							                      what:what_book
+							                    };
+						                      log_operate(res,db,database.logDb,json);
+			        					  	}			        					  	
 							        		res.json({
 							    				errType: 0
 							    			});
@@ -485,10 +509,12 @@ module.exports = function(app) {
 
 
 	// });//modify one book
-	app.put('/admin/book/unqId',function(req,res){
+	app.put('/admin/book/unqId/:save_name',function(req,res){
     var flag = false;
     var db = req.app.get('db');
     var param = req.body;
+    var Modify_book_info;
+    var save_name = req.params.save_name;
     var mdfBook = {
         name: param.name,
         image: param.image,
@@ -510,7 +536,7 @@ module.exports = function(app) {
         else{
             for(var i=0;i<books.data.length;i++)
             {
-                if(books.data[i].isbn == param.isbn)
+                if(books.data[i].unqId == param.unqId)
                 {
                     books.data[i].name = mdfBook.name;
                     db.insert(books,function(err,data){
@@ -532,7 +558,7 @@ module.exports = function(app) {
 					            else{
 					                for(var j = 0 ; j < bookprops.data.length ; j++)
 					                {
-					                    if(bookprops.data[j].isbn == param.isbn)
+					                    if(bookprops.data[j].unqId == param.unqId)
 					                    {
 					                        bookprops.data[j].name = param.name;
 					                        bookprops.data[j].image = param.image;
@@ -542,6 +568,9 @@ module.exports = function(app) {
 					                        bookprops.data[j].pageCount = param.pageCount;
 					                        bookprops.data[j].price = param.price;
 					                        bookprops.data[j].desc = param.desc;
+
+					                        Modify_book_info = bookprops.data[j];
+
 					                        db.insert(bookprops,function(err,data){
 					                            if(err)
 					                            {
@@ -551,6 +580,15 @@ module.exports = function(app) {
 					                                }); 
 					                            }else{
 					                                console.log('[update book info]update book Successfull');
+					                                
+					                                json = {
+						                              intrID:save_name,
+						                              time: new Date(),
+						                              action:"Modify",
+						                              what:Modify_book_info
+						                            };
+						                            log_operate(res,db,database.logDb,json);
+
 					                                res.json({
 					                                'errType': 0
 					                                });

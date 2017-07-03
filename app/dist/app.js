@@ -342,8 +342,8 @@ function($cookies,$scope, $state, $timeout, NgTableParams, adminBooksService, Ev
     $scope.getEventData(),
     $scope.getLogData()
 }]),
-adminApp.controller("ManageBooksCtrl", ["$scope", "$element", "$http", "$location", "$timeout", "NgTableParams", "adminBooksService",
-function($scope, $element, $http, $location, $timeout, NgTableParams, adminBooksService) {
+adminApp.controller("ManageBooksCtrl", ["$cookies","$scope", "$element", "$http", "$location", "$timeout", "NgTableParams", "adminBooksService",
+function($cookies,$scope, $element, $http, $location, $timeout, NgTableParams, adminBooksService) {
 
     function settingSearch() {
         "0" == $scope.setting.search.type ? ($scope.tableParams.filter().unqId = $scope.setting.search.value, $scope.tableParams.filter().name = "", $scope.tableParams.filter().author = "", $scope.tableParams.filter().isbn = "") : "1" == $scope.setting.search.type ? ($scope.tableParams.filter().name = $scope.setting.search.value, $scope.tableParams.filter().unqId = "", $scope.tableParams.filter().author = "", $scope.tableParams.filter().isbn = "") : "2" == $scope.setting.search.type ? ($scope.tableParams.filter().author = $scope.setting.search.value, $scope.tableParams.filter().unqId = "", $scope.tableParams.filter().name = "", $scope.tableParams.filter().isbn = "") : "3" == $scope.setting.search.type && ($scope.tableParams.filter().isbn = $scope.setting.search.value, $scope.tableParams.filter().unqId = "", $scope.tableParams.filter().name = "", $scope.tableParams.filter().author = "")
@@ -487,6 +487,7 @@ function($scope, $element, $http, $location, $timeout, NgTableParams, adminBooks
         $scope.tableParams.settings().filterOptions.filterComparator = currentSetting.showStrict
     },
     $scope.deleteBooks = function() {
+        // console.log($cookies.getObject("status_admin"));
         $scope.deleteBookList = {
             isDeleting: !1,
             deletedNum: 0,
@@ -519,21 +520,39 @@ function($scope, $element, $http, $location, $timeout, NgTableParams, adminBooks
         var count = 0,
         succCount = 0,
         failCount = 0;
-        angular.forEach($scope.deleteBookList.list,
-        function(book) {
-            
-            adminBooksService.deleteOneBook(book.unqId,
+        // angular.forEach($scope.deleteBookList.list,
+        // function(book) { 
+        //     console.log(adminBooksService.books);
+        //     adminBooksService.deleteOneBook($cookies.getObject("status_admin").intrID,book.unqId,
+        //     function(res) {
+        //         console.log(res);   
+        //           0 == res.errType ? (adminBooksService.books.splice($scope.findBook(book.unqId), 1), $scope.tableParams.reload(), succCount++, result(++count)) : (failCount++, result(++count));
+        //     },
+        //     function(res) {
+        //         console.log(res);
+        //         failCount++;
+        //         result(++count);
+        //     });
+        //     console.log("err function");
+        // })
+        function for_each(count){
+            adminBooksService.deleteOneBook($cookies.getObject("status_admin").intrID,$scope.deleteBookList.list[count].unqId,
             function(res) {
-                console.log("success");   
-                 0 == res.errType ? (adminBooksService.books.splice($scope.findBook(book.unqId), 1), $scope.tableParams.reload(), succCount++, result(++count)) : (failCount++, result(++count));
+                console.log(res); 
+                0 == res.errType ? (adminBooksService.books.splice($scope.findBook($scope.deleteBookList.list[count].unqId), 1), $scope.tableParams.reload(), succCount++, result(++count)) : (failCount++, result(++count));
+                if(count==$scope.deleteBookList.list.length)
+                {
+                   return; 
+                }
+                for_each(count);
             },
             function(res) {
                 console.log(res);
                 failCount++;
                 result(++count);
             });
-            // console.log("err function");
-        })
+        };
+        for_each(count);
     },
     $scope.modifyBook = function() {
         var modifyBookList = [];
@@ -544,8 +563,8 @@ function($scope, $element, $http, $location, $timeout, NgTableParams, adminBooks
         1 == modifyBookList.length && $location.path("/manage/book/" + modifyBookList[0])
     }
 }]),
-adminApp.controller("ManageBookCtrl", ["$scope", "$http", "$timeout", "$location", "$stateParams", "adminBooksService",
-function($scope, $http, $timeout, $location, $stateParams, adminBooksService) {
+adminApp.controller("ManageBookCtrl", ["$cookies","$scope", "$http", "$timeout", "$location", "$stateParams", "adminBooksService",
+function($cookies,$scope, $http, $timeout, $location, $stateParams, adminBooksService) {
     $scope.book = {},
     $scope.initBook = function() {
         for (var index = 0; index < adminBooksService.books.length; index++) if (adminBooksService.books[index].unqId == $stateParams.bookId) {
@@ -579,7 +598,7 @@ function($scope, $http, $timeout, $location, $stateParams, adminBooksService) {
     },
     $scope.saveBook = function() {
         $("#saveButton").button("loading"),
-        adminBooksService.setBook($scope.book,
+        adminBooksService.setBook($cookies.getObject("status_admin").intrID,$scope.book,
         function(res) {
             0 == res.errType ? (adminBooksService.books.splice($scope.findBook($scope.book.unqId), 1, $scope.book), $scope.alertMessage(4, $scope.book), $location.path("/manage/books")) : 1 == res.errType ? $scope.alertMessage(11, $scope.book) : $scope.alertMessage(12, $scope.book),
             $("#saveButton").button("reset")
@@ -591,7 +610,7 @@ function($scope, $http, $timeout, $location, $stateParams, adminBooksService) {
     },
     $scope.deleteBook = function() {
         $("#deleteButton").button("loading"),
-        adminBooksService.deleteOneBook($scope.book.unqId,
+        adminBooksService.deleteOneBook($cookies.getObject("status_admin").intrID,$scope.book.unqId,
         function(res) {
             0 == res.errType ? (adminBooksService.books.splice($scope.findBook($scope.book.unqId), 1), $scope.alertMessage(2, $scope.book), $timeout(function() {
                 $location.path("/manage/books")
@@ -646,7 +665,7 @@ function($cookies,$scope, $http, $timeout, $location, adminBooksService) {
     },
     $scope.addBook = function() {
         $("#addButton").button("loading"),
-        adminBooksService.addBook($scope.book,
+        adminBooksService.addBook($cookies.getObject("status_admin").intrID,$scope.book,
         function(res) {
             0 == res.errType ? (adminBooksService.books.push($scope.book), $location.path("/manage/books"), $scope.alertMessage(1, $scope.book)) : 1 == res.errType ? $scope.alertMessage(5, $scope.book) : $scope.alertMessage(6, $scope.book),
             $("#addButton").button("reset")
@@ -1174,15 +1193,15 @@ serviceApp.factory("adminBooksService", ["$http",
 function($http) {
     var books = [];
     return {
-        addBook: function(book, success, error) {
-            $http.post("/admin/books", book).success(success).error(error)
+        addBook: function(admin_name,book, success, error) {
+            $http.post("/admin/books/"+admin_name, book).success(success).error(error)
         },
-        deleteOneBook: function(unqId, success, error) {
+        deleteOneBook: function(intrID,unqId, success, error) {
             console.log(unqId);
-            $http.get("/admin/book/" + unqId).success(success).error(error)
+            $http.get("/admin/book/" + unqId+"/"+intrID).success(success).error(error)
         },
-        setBook: function(book, success, error) {
-            $http.put("/admin/book/unqId", book).success(success).error(error)
+        setBook: function(save_name,book, success, error) {
+            $http.put("/admin/book/unqId/"+save_name, book).success(success).error(error)
         },
         getAllBooks: function(success, error) {
             $http.get("/admin/books").success(success).error(error)
@@ -1250,8 +1269,8 @@ function($http) {
             })
         },
         //599
-        returnEvent: function(unqId) {
-            return $http.post("/admin/events/" + unqId)
+        returnEvent: function(unqId,intrID) {
+            return $http.post("/admin/events/" + unqId,{intrID:intrID})
         },
         events: events
     }

@@ -4,6 +4,7 @@ var History = require('../models/History.js');
 var filter = require('../models/Filter.js');
 var database = require("./database_setting.js");
 
+
 // module.exports = function(app) {
 //   app.get('/admin/books', filter.adminAuthorize, function(req, res) {
 //     Book.find(function(err, books) {
@@ -108,6 +109,7 @@ module.exports = function(app){
               };
             };
           };
+
           res.send(newBooks);
         };
       });

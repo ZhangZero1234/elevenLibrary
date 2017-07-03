@@ -2,6 +2,7 @@ var User = require('../models/User.js'); //User mocule
 var bluepage = require('ibm_bluepages');
 var filter = require('../models/Filter.js');
 var database = require("./database_setting.js");
+var log_operate = require("./log_operation.js");
 /*
  * GET users listing.
  */
@@ -100,7 +101,7 @@ module.exports = function(app) {
               pwd: pwd,
               name: result.userName
             };
-            // req.session.user_id = intrID;
+            req.session.admin_id = intrID;
             // req.session.user = result.userName;
             console.log('GetNameByIntranetID', result);
             db.get(database.usersDb,function(err,users){
@@ -211,7 +212,21 @@ module.exports = function(app) {
   });
 
   app.post('/user/logOut', function(req, res){
+    var db = req.app.get("db");
+    var json;
+    if(req.session.user_id)
+    {
+      console.log(req.session.user_id);
+      json = {
+              intrID:req.session.user_id,
+              time: new Date(),
+              action:"LoginOut"
+            };
+      log_operate(res,db,database.logDb,json);
+    }
     req.session.destroy(function(err){
+      // req.session.user_id = intrID;
+      // req.session.user = result.userName;  
       res.send(err);
     });
   });
@@ -510,6 +525,7 @@ module.exports = function(app) {
     var intrID = req.body.intrID;
     var pwd = req.body.pwd;
     var flag = true;
+    var json;
     bluepage.authenticate(intrID, pwd, function(success) {
       if (success) {console.log("bluepage.authenticate Successfully.");
         bluepage.getPersonInfoByIntranetID(intrID, function(result) {
@@ -532,6 +548,7 @@ module.exports = function(app) {
             req.session.user_id = intrID;
             req.session.user = result.userName;
             console.log('GetNameByIntranetID', result);
+
             db.get(database.usersDb,function(err,users){
               if(err)
               {
@@ -544,6 +561,12 @@ module.exports = function(app) {
                 {
                   if(users.data[i].intrID == intrID)
                   {
+                    json = {
+                      intrID:intrID,
+                      time: new Date(),
+                      action:"Login"
+                      };
+                    log_operate(res,db,database.logDb,json);
                     res.send({
                       errType: 0,
                       name: result.userName,
@@ -571,6 +594,12 @@ module.exports = function(app) {
                         });
                       }
                       else{
+                          json = {
+                            intrID:intrID,
+                            time: new Date(),
+                            action:"Login"
+                        };
+                        log_operate(res,db,database.logDb,json);
                         res.send({
                           errType: 0,
                           name: result.userName,
@@ -582,7 +611,6 @@ module.exports = function(app) {
                 }
               }
             });
-            
           }
         });
       } else {console.log("bluepage.authenticate Failed!");

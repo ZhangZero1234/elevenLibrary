@@ -3,6 +3,8 @@ var Book = require('../models/Book.js');
 var BookProp = require('../models/BookProp.js');
 var filter = require('../models/Filter.js');
 var database = require("./database_setting.js");
+var log_operate = require("./log_operation.js");
+
 
 module.exports = function(app) {
   app.put('/book/:unqId/borrow', filter.authorize, function(req, res) {
@@ -12,6 +14,8 @@ module.exports = function(app) {
     var flag = true;
     var result = {};
     var flag_db = true;
+    var json;
+    var borrow_book_info;
     // console.log(intrID);
     // res.send(intrID);
     
@@ -44,11 +48,12 @@ module.exports = function(app) {
             console.log('[Find book] Find book DB err : ' + err);
           }
           else{
-            console.log("jinlailaalalalalalalala");
             for(var i = 0 ; i < book.data.length ; i++)
             {
               if( (book.data[i].unqId == req.params.unqId) && book.data[i].status==0)
               {
+
+                borrow_book_info = book.data[i];
                 flag = true;
                 var applyTime = Date();
                 book.data[i].status = 1;
@@ -68,6 +73,13 @@ module.exports = function(app) {
                   console.log('[Update book status and time] Update book DB err : ' + err);
                 }
                 else{
+                  json = {
+                    intrID:intrID,
+                    time: new Date(),
+                    action:"Borrow",
+                    what:borrow_book_info
+                  };
+                  log_operate(res,db,database.logDb,json);
                   res.send({
                     errType: 0,
                     applyTime: applyTime
@@ -89,7 +101,6 @@ module.exports = function(app) {
   }); //apply one book
 //, filter.adminAuthorize
   app.get('/admin/events', function(req, res) {
-    // res.send("hahahahaha");
     var db = req.app.get('db');
     db.get(database.listsDb,function(err,books){
       if(err)
@@ -387,8 +398,9 @@ module.exports = function(app) {
   app.post('/admin/events/:unqId', filter.adminAuthorize, function(req, res) {
     var unqId = req.params.unqId;
     var db = req.app.get('db');
+    // var intrID = req.body.intrID;
     // var intrID = req.body.intrId;
-
+    var return_book_info;
     db.get(database.listsDb,function(err,books){
         var intrID_buffer;
         if(err)
@@ -400,6 +412,7 @@ module.exports = function(app) {
           {
             if(books.data[i].unqId == unqId)
             {
+              return_book_info = books.data[i];
               intrID_buffer = books.data[i].intrID;
               books.data[i].status = 0;
               books.data[i].intrID = "";
@@ -452,6 +465,15 @@ module.exports = function(app) {
                           console.log('[User Returned Books] Update user borrowed books DB err : ' + err);
                         }
                         else{
+
+                          json = {
+                            intrID:intrID_buffer,
+                            time: new Date(),
+                            action:"Return",
+                            what:return_book_info
+                          };
+                          log_operate(res,db,database.logDb,json);
+
                           res.json({
                             errType: 0
                           });
