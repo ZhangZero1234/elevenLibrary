@@ -77,11 +77,17 @@ function initDBConnection() {
 */
 
 var Cloudant = require("cloudant");
+// var dbConfig = {
+//     account : '84314864-f8e8-4931-9454-17d35fa1071c-bluemix', 
+//     password : "32a5da510f3b0c4d37f87621242e1b7d43a39c2cd78603b3ce0e61520b512f24",
+//     dbName : "student",
+//     url:'https://84314864-f8e8-4931-9454-17d35fa1071c-bluemix:32a5da510f3b0c4d37f87621242e1b7d43a39c2cd78603b3ce0e61520b512f24@84314864-f8e8-4931-9454-17d35fa1071c-bluemix.cloudant.com'
+// };
 var dbConfig = {
-    account : '84314864-f8e8-4931-9454-17d35fa1071c-bluemix', 
-    password : "32a5da510f3b0c4d37f87621242e1b7d43a39c2cd78603b3ce0e61520b512f24",
-    dbName : "student",
-    url:'https://84314864-f8e8-4931-9454-17d35fa1071c-bluemix:32a5da510f3b0c4d37f87621242e1b7d43a39c2cd78603b3ce0e61520b512f24@84314864-f8e8-4931-9454-17d35fa1071c-bluemix.cloudant.com'
+    account : '5a499305-db73-4c2c-848d-db3ee9081fad-bluemix', 
+    password : "aba2f466ef2640a133c0ea7201fecdad0a4d95708034f5eda83e2bfc3782c3da",
+    dbName : "elevenlibrary",
+    url:"https://5a499305-db73-4c2c-848d-db3ee9081fad-bluemix:aba2f466ef2640a133c0ea7201fecdad0a4d95708034f5eda83e2bfc3782c3da@5a499305-db73-4c2c-848d-db3ee9081fad-bluemix.cloudant.com" 
 };
 var cloudant = Cloudant(dbConfig);
 console.log(cloudant);

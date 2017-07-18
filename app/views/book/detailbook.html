@@ -54,9 +54,9 @@
         <div id="contactDiv" class="meta-act">
           <h3 class="meta-head">Contact Admin</h3>
           <!-- <img src="../images/thumb_admin.jpg" alt="admin" class="img-inset"> -->
-          <a class="meta-act-link" style="padding: 10px 0;">{{contact_name}}</a>
-          <a href="mailto:lzishuo@cn.ibm.com?subject=11Library" class="meta-act-link" style="padding: 0 0;"><span class="glyphicon glyphicon-envelope"></span> {{contact_email}}</a>
-          <a class="meta-act-link" style="padding: 10px 0;"><span class="glyphicon glyphicon-phone"></span> {{contact_phone}}</a>
+          <a class="meta-act-link" style="padding: 10px 0;">{{contact_name}}</a><br>
+          <a href="mailto:lzishuo@cn.ibm.com?subject=11Library" class="meta-act-link" style="padding: 0 0;"><span class="glyphicon glyphicon-envelope"></span> {{contact_email}}</a><br>
+          <a class="meta-act-link" style="padding: 10px 0;"><span class="glyphicon glyphicon-phone" ng-show="contact_phone!=''"></span> {{contact_phone}}</a>
           <br />
         </div>
         <h3 class="meta-head" ng-show="showSimilarBooks">More Similar Books</h3>

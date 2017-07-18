@@ -132,7 +132,7 @@ module.exports = function(app) {
                   users.data.push({
                       "intrID":intrID,
                       "name":result.userName,
-                      "pwd":pwd,
+                      // "pwd":pwd,
                       'phoneNum': phoneNum
                     });
                     db.insert(users,function(err,data){
@@ -582,7 +582,7 @@ module.exports = function(app) {
                   users.data.push({
                       "intrID":intrID,
                       "name":result.userName,
-                      "pwd":pwd,
+                      // "pwd":pwd,
                       'phoneNum': phoneNum
                     });
                     db.insert(users,function(err,data){

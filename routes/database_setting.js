@@ -1,6 +1,6 @@
 module.exports = {
-	listsDb : "1",
-	detailsDb : "2",
-	usersDb : "3",
-	logDb : "4"
+	listsDb : "booklist",
+	detailsDb : "bookdetail",
+	usersDb : "user",
+	logDb : "actionlog"
 }
