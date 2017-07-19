@@ -429,60 +429,65 @@ module.exports = function(app) {
               //   }
               // }
               
-              db.insert(books,function(err,data){
-                if(err)
-                {
-                  console.log('[Return a book] Upate book status and time DB err : ' + err);
-                }
-                else{
-                  db.get(database.usersDb,function(err,users){
-                    if(err)
-                    {
-                      console.log("find user err:"+err);
-                    }
-                    else{
-                      console.log(intrID_buffer);
-                      for(var n = 0 ; n < users.data.length ; n++)
+              try{
+                  db.insert(books,function(err,data){
+                  if(err)
+                  {
+                    console.log('[Return a book] Upate book status and time DB err : ' + err);
+                  }
+                  else{
+                    db.get(database.usersDb,function(err,users){
+                      if(err)
                       {
-                        console.log(users.data[n].intrID == intrID_buffer);
-                        if(users.data[n].intrID == intrID_buffer)
-                        {
-                          for(var k = 0 ; k < users.data[n].borrowedBooks.length ; k++)
-                          {
-
-                            if(users.data[n].borrowedBooks[k].unqId == unqId)
-                            {
-                              users.data[n].borrowedBooks.splice(k,1);
-                              break;
-                            }
-                          }
-                          break;
-                        }
+                        console.log("find user err:"+err);
                       }
-                      db.insert(users,function(err,data){
-                        if(err)
+                      else{
+                        console.log(intrID_buffer);
+                        for(var n = 0 ; n < users.data.length ; n++)
                         {
-                          console.log('[User Returned Books] Update user borrowed books DB err : ' + err);
-                        }
-                        else{
+                          console.log(users.data[n].intrID == intrID_buffer);
+                          if(users.data[n].intrID == intrID_buffer)
+                          {
+                            for(var k = 0 ; k < users.data[n].borrowedBooks.length ; k++)
+                            {
 
-                          json = {
-                            intrID:intrID_buffer,
-                            time: new Date(),
-                            action:"Return",
-                            what:return_book_info
-                          };
-                          log_operate(res,db,database.logDb,json);
-
-                          res.json({
-                            errType: 0
-                          });
+                              if(users.data[n].borrowedBooks[k].unqId == unqId)
+                              {
+                                users.data[n].borrowedBooks.splice(k,1);
+                                break;
+                              }
+                            }
+                            break;
+                          }
                         }
-                      });
-                    }
-                  });
-                }
-              });
+                        db.insert(users,function(err,data){
+                          if(err)
+                          {
+                            console.log('[User Returned Books] Update user borrowed books DB err : ' + err);
+                          }
+                          else{
+
+                            json = {
+                              intrID:intrID_buffer,
+                              time: new Date(),
+                              action:"Return",
+                              what:return_book_info
+                            };
+                            log_operate(res,db,database.logDb,json);
+
+                            res.json({
+                              errType: 0
+                            });
+                          }
+                        });
+                      }
+                    });
+                  }
+                });
+              }
+              catch(e){
+                throw new Error("upadate too fast");
+              }
               break;
             } // if end
           } //for end 
