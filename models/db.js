@@ -83,12 +83,20 @@ var Cloudant = require("cloudant");
 //     dbName : "student",
 //     url:'https://84314864-f8e8-4931-9454-17d35fa1071c-bluemix:32a5da510f3b0c4d37f87621242e1b7d43a39c2cd78603b3ce0e61520b512f24@84314864-f8e8-4931-9454-17d35fa1071c-bluemix.cloudant.com'
 // };
+// var dbConfig = {
+//     account : '5a499305-db73-4c2c-848d-db3ee9081fad-bluemix', 
+//     password : "aba2f466ef2640a133c0ea7201fecdad0a4d95708034f5eda83e2bfc3782c3da",
+//     dbName : "elevenlibrary",
+//     url:"https://5a499305-db73-4c2c-848d-db3ee9081fad-bluemix:aba2f466ef2640a133c0ea7201fecdad0a4d95708034f5eda83e2bfc3782c3da@5a499305-db73-4c2c-848d-db3ee9081fad-bluemix.cloudant.com" 
+// };
+
 var dbConfig = {
-    account : '5a499305-db73-4c2c-848d-db3ee9081fad-bluemix', 
-    password : "aba2f466ef2640a133c0ea7201fecdad0a4d95708034f5eda83e2bfc3782c3da",
+    account : 'f5e06e7f-c8b6-4d4a-b25b-560c7da7c363-bluemix', 
+    password : "368e4fca14c81c076edf9ace095eafa51945059e13c37ed46a847af4aad9cfe4",
     dbName : "elevenlibrary",
-    url:"https://5a499305-db73-4c2c-848d-db3ee9081fad-bluemix:aba2f466ef2640a133c0ea7201fecdad0a4d95708034f5eda83e2bfc3782c3da@5a499305-db73-4c2c-848d-db3ee9081fad-bluemix.cloudant.com" 
+    url:"https://f5e06e7f-c8b6-4d4a-b25b-560c7da7c363-bluemix:368e4fca14c81c076edf9ace095eafa51945059e13c37ed46a847af4aad9cfe4@f5e06e7f-c8b6-4d4a-b25b-560c7da7c363-bluemix.cloudant.com (https://f5e06e7f-c8b6-4d4a-b25b-560c7da7c363-bluemix:368e4fca14c81c076edf9ace095eafa51945059e13c37ed46a847af4aad9cfe4@f5e06e7f-c8b6-4d4a-b25b-560c7da7c363-bluemix.cloudant.com')" 
 };
+
 var cloudant = Cloudant(dbConfig);
 console.log(cloudant);
 var db = cloudant.db.use(dbConfig.dbName);
