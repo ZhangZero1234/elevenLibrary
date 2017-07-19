@@ -94,7 +94,7 @@ var dbConfig = {
     account : 'f5e06e7f-c8b6-4d4a-b25b-560c7da7c363-bluemix', 
     password : "368e4fca14c81c076edf9ace095eafa51945059e13c37ed46a847af4aad9cfe4",
     dbName : "elevenlibrary",
-    url:"https://f5e06e7f-c8b6-4d4a-b25b-560c7da7c363-bluemix:368e4fca14c81c076edf9ace095eafa51945059e13c37ed46a847af4aad9cfe4@f5e06e7f-c8b6-4d4a-b25b-560c7da7c363-bluemix.cloudant.com (https://f5e06e7f-c8b6-4d4a-b25b-560c7da7c363-bluemix:368e4fca14c81c076edf9ace095eafa51945059e13c37ed46a847af4aad9cfe4@f5e06e7f-c8b6-4d4a-b25b-560c7da7c363-bluemix.cloudant.com')" 
+    url:"https://f5e06e7f-c8b6-4d4a-b25b-560c7da7c363-bluemix:368e4fca14c81c076edf9ace095eafa51945059e13c37ed46a847af4aad9cfe4@f5e06e7f-c8b6-4d4a-b25b-560c7da7c363-bluemix.cloudant.com" 
 };
 
 var cloudant = Cloudant(dbConfig);
