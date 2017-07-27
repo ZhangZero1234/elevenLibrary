@@ -13,9 +13,13 @@ var domain = require('domain');
 
 var app = express();
 //cloudant connect
-app.set("cloudant", db.cloudant);
-app.set("db", db.db);
+// app.set("cloudant", db.cloudant);
+// app.set("db", db.db);
 // view engine setup
+
+//couchDB connect
+app.set("db", db.elevenlibrary);
+console.log(db.elevenlibrary);
 app.set('views', path.join(__dirname, './app/views'));
 
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
